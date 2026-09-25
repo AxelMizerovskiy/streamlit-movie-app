@@ -59,16 +59,29 @@ st.pyplot(fig1)
 
 # Question 2: Genre Satisfaction
 st.header("2. Genre Satisfaction (Average Rating)")
-fig2, ax2 = plt.subplots(figsize=(10, 6))
+
+# Filter out nulls, empty strings, and the standard MovieLens placeholder '(no genres listed)'
+clean_genres_df = df_exploded_filtered[
+    df_exploded_filtered['genres'].notna() & 
+    ~df_exploded_filtered['genres'].isin(['(no genres listed)', '', 'None'])
+]
+
 genre_avg_rating = (
-    df_exploded_filtered.groupby("genres")["rating"].mean().sort_values(ascending=False)
+    clean_genres_df.groupby('genres')['rating']
+    .mean()
+    .sort_values(ascending=False)
 )
-sns.barplot(
-    x=genre_avg_rating.values, y=genre_avg_rating.index, ax=ax2, palette="magma"
-)
+
+fig2, ax2 = plt.subplots(figsize=(10, 6))
+sns.barplot(x=genre_avg_rating.values, y=genre_avg_rating.index, ax=ax2, palette="magma")
 ax2.set_xlabel("Average Rating")
 ax2.set_ylabel("Genre")
-ax2.set_xlim(0, 5)  # Ratings are 0-5
+ax2.set_xlim(0, 5)
+
+# Annotate values on the bars for clarity
+for i, v in enumerate(genre_avg_rating.values):
+    ax2.text(v + 0.05, i, f"{v:.2f}", color='black', va='center')
+
 st.pyplot(fig2)
 
 # Question 3: Ratings Over Time

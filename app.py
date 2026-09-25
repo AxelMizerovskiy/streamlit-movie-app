@@ -11,12 +11,18 @@ st.title("MovieLens Data Exploration")
 # 1. Load Data
 @st.cache_data
 def load_data():
-    # Load the CSV. Assumes movie_ratings.csv is in the same directory.
     df = pd.read_csv("movie_ratings.csv")
-
-    # Pre-processing for Question 1: Split pipe-separated genres and explode into rows
-    # This means a movie with "Action|Sci-Fi" becomes two separate rows for aggregation.
-    df_exploded = df.assign(genres=df["genres"].str.split("|")).explode("genres")
+    
+    # Split pipe-separated genres and explode into rows
+    df_exploded = df.assign(genres=df['genres'].str.split('|')).explode('genres')
+    
+    # Drop missing, blank, and 'unknown' entries cleanly
+    invalid_genres = ['unknown', '(no genres listed)', '', 'None']
+    df_exploded = df_exploded[
+        df_exploded['genres'].notna() & 
+        ~df_exploded['genres'].str.strip().str.lower().isin([g.lower() for g in invalid_genres])
+    ]
+    
     return df, df_exploded
 
 
